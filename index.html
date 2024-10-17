@@ -1,1 +1,67 @@
+// Prototyp projektu strony do ćwiczenia matematyki dla uczniów 5 klasy
+
+// Frontend (HTML, CSS, JavaScript)
+const htmlContent = `
+<div>
+    <h1>Matematyka - Przygotowanie do Sprawdzianu</h1>
+    <input id="topic" type="text" placeholder="Wpisz zagadnienie, np. ułamki">
+    <button onclick="generateTasks()">Generuj Zadania</button>
+    <div id="tasks"></div>
+</div>
+
+<script>
+    async function generateTasks() {
+        const topic = document.getElementById('topic').value;
+        const response = await fetch('/generate-tasks', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ topic: topic })
+        });
+        const data = await response.json();
+        let tasksHtml = '';
+        data.tasks.forEach((task, index) => {
+            tasksHtml += `<p>Zadanie ${index + 1}: ${task}</p><input type="text" id="answer${index}"><br>`;
+        });
+        document.getElementById('tasks').innerHTML = tasksHtml;
+    }
+</script>
+`;
+
+// Backend (Node.js, Express, OpenAI API)
+const express = require('express');
+const bodyParser = require('body-parser');
+const { Configuration, OpenAIApi } = require('openai');
+
+const app = express();
+const port = 3000;
+
+app.use(bodyParser.json());
+
+const configuration = new Configuration({
+    apiKey: 'YOUR_OPENAI_API_KEY',
+});
+const openai = new OpenAIApi(configuration);
+
+app.post('/generate-tasks', async (req, res) => {
+    const topic = req.body.topic;
+    const prompt = `Stwórz 10 zadań matematycznych dla ucznia 5 klasy z tematu: ${topic}`;
+
+    try {
+        const completion = await openai.createCompletion({
+            model: 'text-davinci-003',
+            prompt: prompt,
+            max_tokens: 150,
+        });
+        const tasks = completion.data.choices[0].text.split('\n').filter(task => task);
+        res.json({ tasks });
+    } catch (error) {
+        res.status(500).send('Błąd przy generowaniu zadań');
+    }
+});
+
+app.listen(port, () => {
+    console.log(`Aplikacja działa na http://localhost:${port}`);
+});
 
