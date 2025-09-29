@@ -167,7 +167,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (nextTab) {
       nextTab.disabled = false;
-      message.textContent = "Gratulacje! Wszystkie zadania wykonane. Możesz przejść do kolejnego poziomu.";
+      message.textContent =
+        "Gratulacje! Wszystkie zadania wykonane. Możesz przejść do kolejnego poziomu.";
       messageContainer.appendChild(message);
 
       const nextButton = document.createElement("button");
@@ -180,7 +181,7 @@ document.addEventListener("DOMContentLoaded", () => {
       messageContainer.appendChild(nextButton);
     } else {
       message.textContent =
-        "Gratulacje! Ukończyłeś Poziom trzeci i wszystkie zadania w grze.";
+        "Gratulacje! Ukończyłeś wszystkie poziomy i wszystkie zadania.";
       messageContainer.appendChild(message);
 
       const nextStageInfo = document.createElement("p");
