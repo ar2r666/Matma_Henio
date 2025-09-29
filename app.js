@@ -1,10 +1,10 @@
-const TASKS_PER_LEVEL = 8;
+const TASKS_PER_LEVEL = 10;
 const LEVEL_KEYS = ["level1", "level2", "level3"];
 
 const multiplicationData = (() => {
   const items = [];
-  for (let a = 0; a <= 10; a += 1) {
-    for (let b = 0; b <= 10; b += 1) {
+  for (let a = 1; a <= 10; a += 1) {
+    for (let b = 1; b <= 10; b += 1) {
       const product = a * b;
       const difficulty = product <= 30 ? "level1" : product <= 70 ? "level2" : "level3";
       items.push({
@@ -29,24 +29,35 @@ document.addEventListener("DOMContentLoaded", () => {
     level3: document.getElementById("level3Tasks"),
   };
 
+  const levelState = LEVEL_KEYS.reduce((acc, key) => {
+    acc[key] = { solved: 0 };
+    return acc;
+  }, {});
+
   let score = 0;
   let completed = 0;
   const totalTasks = TASKS_PER_LEVEL * LEVEL_KEYS.length;
 
   LEVEL_KEYS.forEach((key) => populateLevel(key, levelConfig[key]));
+  updateScoreboard();
 
   tabs.forEach((tab) => {
     tab.addEventListener("click", () => {
-      const target = tab.dataset.target;
-      if (!target) return;
-
-      document.querySelectorAll(".level-panel").forEach((panel) => {
-        panel.classList.toggle("active", panel.id === target);
-      });
-
-      tabs.forEach((button) => button.classList.toggle("active", button === tab));
+      if (tab.disabled) return;
+      activateTab(tab);
     });
   });
+
+  function activateTab(tab) {
+    const target = tab.dataset.target;
+    if (!target) return;
+
+    document.querySelectorAll(".level-panel").forEach((panel) => {
+      panel.classList.toggle("active", panel.id === target);
+    });
+
+    tabs.forEach((button) => button.classList.toggle("active", button === tab));
+  }
 
   function populateLevel(levelKey, container) {
     container.innerHTML = "";
@@ -57,6 +68,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const card = document.createElement("div");
       card.className = "task-card";
       card.dataset.answer = task.answer;
+      card.dataset.level = levelKey;
 
       const title = document.createElement("h3");
       title.textContent = `Zadanie ${index + 1}`;
@@ -70,39 +82,18 @@ document.addEventListener("DOMContentLoaded", () => {
       input.autocomplete = "off";
       input.placeholder = "Twoja odpowiedź";
 
-      const checkButton = document.createElement("button");
-      checkButton.type = "button";
-      checkButton.textContent = "Sprawdź";
+      input.addEventListener("input", () => {
+        evaluateAnswer(levelKey, card, input);
+      });
 
-      checkButton.addEventListener("click", () => {
-        const userAnswer = Number.parseInt(input.value, 10);
-        const correctAnswer = Number(card.dataset.answer);
-
-        if (Number.isNaN(userAnswer)) {
-          card.classList.add("incorrect");
-          card.classList.remove("correct");
-          return;
-        }
-
-        if (userAnswer === correctAnswer) {
-          if (!card.dataset.completed) {
-            card.dataset.completed = "true";
-            score += 10;
-            completed += 1;
-            updateScoreboard();
-          }
-
-          card.classList.add("correct");
-          card.classList.remove("incorrect");
-          checkButton.disabled = true;
-          input.disabled = true;
-        } else {
-          card.classList.add("incorrect");
-          card.classList.remove("correct");
+      input.addEventListener("keydown", (event) => {
+        if (event.key === "Enter") {
+          event.preventDefault();
+          evaluateAnswer(levelKey, card, input);
         }
       });
 
-      card.append(title, question, input, checkButton);
+      card.append(title, question, input);
       container.appendChild(card);
     });
   }
@@ -112,6 +103,93 @@ document.addEventListener("DOMContentLoaded", () => {
     const percentage = Math.round((completed / totalTasks) * 100);
     progressFill.style.width = `${percentage}%`;
     progressBar.setAttribute("aria-valuenow", String(percentage));
+  }
+
+  function evaluateAnswer(levelKey, card, input) {
+    if (input.disabled) return;
+
+    const rawValue = input.value.trim();
+    if (rawValue === "") {
+      card.classList.remove("correct", "incorrect");
+      return;
+    }
+
+    const userAnswer = Number.parseInt(rawValue, 10);
+    const correctAnswer = Number(card.dataset.answer);
+
+    if (Number.isNaN(userAnswer)) {
+      card.classList.add("incorrect");
+      card.classList.remove("correct");
+      return;
+    }
+
+    if (userAnswer === correctAnswer) {
+      markTaskAsCompleted(levelKey, card, input, correctAnswer);
+    } else {
+      card.classList.add("incorrect");
+      card.classList.remove("correct");
+    }
+  }
+
+  function markTaskAsCompleted(levelKey, card, input, correctAnswer) {
+    card.classList.add("correct");
+    card.classList.remove("incorrect");
+    input.value = String(correctAnswer);
+    input.disabled = true;
+
+    if (!card.dataset.completed) {
+      card.dataset.completed = "true";
+      score += 10;
+      completed += 1;
+      levelState[levelKey].solved += 1;
+      updateScoreboard();
+      handleLevelCompletion(levelKey);
+    }
+  }
+
+  function handleLevelCompletion(levelKey) {
+    if (levelState[levelKey].solved !== TASKS_PER_LEVEL) {
+      return;
+    }
+
+    const panel = document.getElementById(levelKey);
+    const messageContainer = panel?.querySelector(".completion-area");
+    if (!messageContainer) return;
+
+    messageContainer.innerHTML = "";
+    const message = document.createElement("p");
+
+    const nextIndex = LEVEL_KEYS.indexOf(levelKey) + 1;
+    const nextLevelKey = LEVEL_KEYS[nextIndex];
+    const nextTab = nextLevelKey
+      ? document.querySelector(`.level-tabs .tab[data-target="${nextLevelKey}"]`)
+      : null;
+
+    if (nextTab) {
+      nextTab.disabled = false;
+      message.textContent = "Gratulacje! Wszystkie zadania wykonane. Możesz przejść do kolejnego poziomu.";
+      messageContainer.appendChild(message);
+
+      const nextButton = document.createElement("button");
+      nextButton.type = "button";
+      nextButton.textContent = `Przejdź do ${nextTab.textContent}`;
+      nextButton.addEventListener("click", () => {
+        activateTab(nextTab);
+        nextButton.blur();
+      });
+      messageContainer.appendChild(nextButton);
+    } else {
+      message.textContent = "Gratulacje! Ukończyłeś wszystkie zadania w grze.";
+      messageContainer.appendChild(message);
+
+      const tableChallengeLink = document.createElement("a");
+      tableChallengeLink.href = "tabliczka.html";
+      tableChallengeLink.className = "button-link";
+      tableChallengeLink.textContent = "Spróbuj wyzwania z tabliczką mnożenia";
+      messageContainer.appendChild(tableChallengeLink);
+    }
+
+    messageContainer.classList.add("active");
   }
 
   function shuffle(array) {
