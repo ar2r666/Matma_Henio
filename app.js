@@ -29,6 +29,8 @@ document.addEventListener("DOMContentLoaded", () => {
     level3: document.getElementById("level3Tasks"),
   };
 
+  const levelTaskCounts = {};
+
   const levelState = LEVEL_KEYS.reduce((acc, key) => {
     acc[key] = { solved: 0 };
     return acc;
@@ -36,9 +38,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
   let score = 0;
   let completed = 0;
-  const totalTasks = TASKS_PER_LEVEL * LEVEL_KEYS.length;
+  let totalTasks = 0;
 
-  LEVEL_KEYS.forEach((key) => populateLevel(key, levelConfig[key]));
+  LEVEL_KEYS.forEach((key) => {
+    const count = populateLevel(key, levelConfig[key]);
+    levelTaskCounts[key] = count;
+    totalTasks += count;
+  });
   updateScoreboard();
 
   tabs.forEach((tab) => {
@@ -62,7 +68,8 @@ document.addEventListener("DOMContentLoaded", () => {
   function populateLevel(levelKey, container) {
     container.innerHTML = "";
     const filtered = multiplicationData.filter((item) => item.difficulty === levelKey);
-    const tasks = shuffle(filtered).slice(0, TASKS_PER_LEVEL);
+    const availableTasks = Math.min(filtered.length, TASKS_PER_LEVEL);
+    const tasks = shuffle(filtered).slice(0, availableTasks);
 
     tasks.forEach((task, index) => {
       const card = document.createElement("div");
@@ -96,11 +103,13 @@ document.addEventListener("DOMContentLoaded", () => {
       card.append(title, question, input);
       container.appendChild(card);
     });
+
+    return availableTasks;
   }
 
   function updateScoreboard() {
     scoreValue.textContent = score;
-    const percentage = Math.round((completed / totalTasks) * 100);
+    const percentage = totalTasks === 0 ? 0 : Math.round((completed / totalTasks) * 100);
     progressFill.style.width = `${percentage}%`;
     progressBar.setAttribute("aria-valuenow", String(percentage));
   }
@@ -148,7 +157,7 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function handleLevelCompletion(levelKey) {
-    if (levelState[levelKey].solved !== TASKS_PER_LEVEL) {
+    if (levelState[levelKey].solved !== levelTaskCounts[levelKey]) {
       return;
     }
 
