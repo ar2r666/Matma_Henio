@@ -114,14 +114,14 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    const userAnswer = Number.parseInt(rawValue, 10);
-    const correctAnswer = Number(card.dataset.answer);
-
-    if (Number.isNaN(userAnswer)) {
+    if (!/^\d+$/.test(rawValue)) {
       card.classList.add("incorrect");
       card.classList.remove("correct");
       return;
     }
+
+    const userAnswer = Number.parseInt(rawValue, 10);
+    const correctAnswer = Number(card.dataset.answer);
 
     if (userAnswer === correctAnswer) {
       markTaskAsCompleted(levelKey, card, input, correctAnswer);
