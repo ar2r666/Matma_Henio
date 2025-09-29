@@ -13,16 +13,6 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <header class="app-header">
-      <div class="avatar" aria-hidden="true">
-        <img src="https://avatars.dicebear.com/api/bottts/kazmierz.svg" alt="Avatar Kaźmierza Kalkulusa" />
-      </div>
-      <div class="title-group">
-        <h1>Kaźmierz Kalkulus</h1>
-        <p>Twoja podróż po krainie mnożenia 0–100!</p>
-      </div>
-    </header>
-
     <main>
       <section class="scoreboard" aria-label="Pasek postępów">
         <div class="score">
@@ -39,8 +29,8 @@
 
       <nav class="level-tabs" aria-label="Wybór poziomu">
         <button class="tab active" data-target="level1">Poziom 1</button>
-        <button class="tab" data-target="level2">Poziom 2</button>
-        <button class="tab" data-target="level3">Poziom 3</button>
+        <button class="tab" data-target="level2" disabled>Poziom 2</button>
+        <button class="tab" data-target="level3" disabled>Poziom 3</button>
       </nav>
 
       <section class="level-panels" aria-live="polite">
@@ -48,18 +38,21 @@
           <h2>Poziom 1 – Pierwsze kroki</h2>
           <p>Rozgrzewka z wynikami do 30.</p>
           <div class="task-grid" id="level1Tasks"></div>
+          <div class="completion-area" aria-live="polite"></div>
         </article>
 
         <article class="level-panel" id="level2" data-level="level2">
           <h2>Poziom 2 – Wspinaczka</h2>
           <p>Ćwiczymy działania z wynikami do 70.</p>
           <div class="task-grid" id="level2Tasks"></div>
+          <div class="completion-area" aria-live="polite"></div>
         </article>
 
         <article class="level-panel" id="level3" data-level="level3">
           <h2>Poziom 3 – Szczytowa misja</h2>
           <p>Zmierz się z najtrudniejszymi przykładami do 100.</p>
           <div class="task-grid" id="level3Tasks"></div>
+          <div class="completion-area" aria-live="polite"></div>
         </article>
       </section>
     </main>

@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wyzwanie z tabliczką mnożenia</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body class="table-page">
+    <main class="table-main">
+      <header class="table-header">
+        <h1>Wyzwanie z tabliczką mnożenia</h1>
+        <p>Wypełnij brakujące pola w tabeli, aby utrwalić wszystkie wyniki od 1 do 100.</p>
+        <a class="button-link" href="index.html">Wróć do poziomów</a>
+      </header>
+
+      <section class="table-section" aria-live="polite">
+        <div class="table-wrapper">
+          <table class="multiplication-table" id="multiplicationTable"></table>
+        </div>
+        <div class="table-completion" id="tableMessage" aria-live="polite"></div>
+      </section>
+    </main>
+
+    <script src="table.js" defer></script>
+  </body>
+</html>
