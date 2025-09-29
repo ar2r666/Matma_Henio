@@ -89,13 +89,13 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    if (!/^\d+$/.test(rawValue)) {
+    const numericValue = Number.parseInt(rawValue, 10);
+
+    if (Number.isNaN(numericValue)) {
       input.classList.add("incorrect");
       input.classList.remove("correct");
       return;
     }
-
-    const numericValue = Number.parseInt(rawValue, 10);
 
     if (numericValue === expected) {
       input.value = String(expected);
