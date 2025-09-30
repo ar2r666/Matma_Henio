@@ -142,7 +142,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const nextLink = document.createElement("a");
-    nextLink.href = "index.html";
+    nextLink.href = "index.html#gra";
+
     nextLink.className = "table-completion-action";
     nextLink.textContent = "Przejdź do następnego wyzwania (gra)";
 
